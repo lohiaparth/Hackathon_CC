@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react"
 import { getGeminiResponse } from "../../api/gemini/route"
-import { Component } from "../../components/ui/barChart"
+import Component from "@/components/ui/barChart"
+import {PieChartt} from "../../components/ui/pieChart"
 
 export default function Page() {
   const [financialGrowthData, setFinancialGrowthData] = useState([])
@@ -66,13 +67,17 @@ export default function Page() {
       <button onClick={getData} className="bg-blue-500 text-white px-4 py-2 rounded mb-4">
         Refresh Data
       </button>
+      {financialGrowthData["FinancialGrowth"]?.length > 0 && (
+          <Component data={financialGrowthData["FinancialGrowth"]} />
+        )}
+        
 
-      (
+      {/* {marketShares["Sales"]?.length > 0 && (
         <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-2">data</h2>
-          <Component data={marketShares["Sales"]} xKey="year" yKey="sales" title="Car Industry Sales (2014-2023)" />
-        </div>
-      )
+          <h2 className="text-xl font-semibold mb-2">data</h2> */}
+          <PieChartt/>
+        {/* </div> */}
+      {/* )} */}
 
       {marketShares.length > 0 && (
         <div className="mb-8">
