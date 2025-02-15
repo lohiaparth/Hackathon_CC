@@ -1,32 +1,21 @@
-require(
-    "dotenv"
-).config();
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-console.debug(apiKey);
-const genAI = new GoogleGenerativeAI(apiKey);
-
-async function getGeminiResponse(prompt) {
-    // Get the Gemini model
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+export async function getGeminiResponse(apiKey, prompt) {
+    if (!apiKey) {
+        throw new Error('API key is required');
+    }
+    
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     
     try {
-        // Generate content
-        const result = await model.generateContent(prompt);
+        // Make sure prompt is a string
+        const promptString = String(prompt);
+        const result = await model.generateContent(promptString);
         const response = await result.response;
         return response.text();
     } catch (error) {
-        console.error("Error:", error);
-        return null;
+        console.error("Error in getGeminiResponse:", error);
+        throw error; // Rethrow to handle in the component
     }
 }
-
-// Example usage
-async function main() {
-    const prompt = "What is the capital of France?";
-    const response = await getGeminiResponse(prompt);
-    console.log(response);
-}
-
-main();
