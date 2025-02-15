@@ -1,3 +1,4 @@
+// filepath: /Users/parthlohia/Desktop/Hackathon_CC/cofounder/src/app/product-info/page.jsx
 "use client";
 
 import { useState } from "react";
@@ -6,20 +7,27 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useRouter } from 'next/navigation';
 
 export default function IndustryForm() {
   const form = useForm({
     defaultValues: {
       industry: "",
       otherIndustry: "",
+      Description: "",
+      targetMarket: "",
+
     },
   });
 
-  const selectedIndustry = form.watch("industry"); // Watch the industry field
+  ;
   const [showOtherField, setShowOtherField] = useState(false);
+  const router = useRouter();
 
   const onSubmit = (data) => {
-    console.log("Form Data:", data);
+    
+    console.debug("Form Data:", data);
+    router.push('/data-validation');
   };
 
   return (
@@ -37,44 +45,44 @@ export default function IndustryForm() {
               <FormItem>
                 <FormLabel>Industry</FormLabel>
                 <FormControl>
-                  <Select
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      setShowOtherField(value === "other"); // Show input if "Other" is selected
-                      if (value !== "other") form.setValue("otherIndustry", ""); // Clear other field if not selected
-                    }}
-                    defaultValue={field.value}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an option" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="technology">Technology</SelectItem>
-                      <SelectItem value="finance">Finance</SelectItem>
-                      <SelectItem value="healthcare">Healthcare</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <Input
+          placeholder="Enter your industry"
+          {...field}
+          onChange={(e) => {
+            // Update react-hook-form state
+            field.onChange(e);
+            // Store the value in localStorage
+            localStorage.setItem("Industry", e.target.value);
+          }}
+        />
                 </FormControl>
                 <FormMessage />
               </FormItem>
-              
             )}
           />
-          <FormField
-            control={form.control}
-            name="Description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Product / Service Description</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter your product or service description" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-              
-            )}
-          />
+<FormField
+  control={form.control}
+  name="Description"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Product / Service Description</FormLabel>
+      <FormControl>
+        <Input
+          placeholder="Enter your product or service description"
+          {...field}
+          onChange={(e) => {
+            // Update react-hook-form state
+            field.onChange(e);
+            // Store the value in localStorage
+            localStorage.setItem("Description", e.target.value);
+          }}
+        />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
           <FormField
             control={form.control}
             name="targetMarket"
@@ -82,30 +90,23 @@ export default function IndustryForm() {
               <FormItem>
                 <FormLabel>Target Audience</FormLabel>
                 <FormControl>
-                  <Input placeholder="Describe your target customers..." {...field} />
+                <Input
+          placeholder="Describe your target customers..."
+          {...field}
+          onChange={(e) => {
+            // Update react-hook-form state
+            field.onChange(e);
+            // Store the value in localStorage
+            localStorage.setItem("Target Market", e.target.value);
+          }}
+        />
+
                 </FormControl>
                 <FormMessage />
               </FormItem>
-              
             )}
           />
 
-          {/* Additional Input Field for "Other" Industry */}
-          {showOtherField && (
-            <FormField
-              control={form.control}
-              name="otherIndustry"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Specify your industry</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter your industry" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
 
           {/* Buttons */}
           <div className="flex justify-between">

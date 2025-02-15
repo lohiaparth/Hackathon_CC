@@ -1,110 +1,253 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js'
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, ArcElement)
+import { Line, Bar, Pie } from 'react-chartjs-2'
 import { getGeminiResponse } from "../../api/gemini/route"
-import Component from "@/components/ui/barChart"
-import {PieChartt} from "../../components/ui/pieChart"
+  
+
+
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+)
 
 export default function Page() {
+  
+  
+
   const [financialGrowthData, setFinancialGrowthData] = useState([])
   const [totalMarketCap, setTotalMarketCap] = useState(null)
   const [marketShares, setMarketShares] = useState([])
   const [potentialGrowth, setPotentialGrowth] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  // Common chart configuration
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            let label = context.dataset.label || ''
+            if (label) label += ': '
+            if (context.parsed.y !== null) {
+              label += new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                maximumFractionDigits: 0
+              }).format(context.parsed.y)
+            }
+            return label
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: (value) => {
+            return new Intl.NumberFormat('en-US', {
+              style: 'currency',
+              currency: 'USD',
+              maximumFractionDigits: 0
+            }).format(value)
+          }
+        }
+      }
+    }
+  }
 
   const getData = async () => {
     try {
+      setLoading(true)
+      setError(null)
+
       if (!process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
-        console.error("API key is not defined")
-        return
+        throw new Error("Missing Gemini API Key")
       }
 
-      const financialGrowth = await getGeminiResponse(
-        process.env.NEXT_PUBLIC_GEMINI_API_KEY,
-        `Provide industry sales data for the CAR industry for the past 10 years (2014-2023).  Return the data in a array format where each element represents a year's sales.  Each element in the array should be an object with the keys "year" and "sales" (in USD billions).  If data for a specific year is unavailable, use "null" as the value for the "sales" key. DO NOT RETURN ANY OTHER TEXT. MAKE SURE THAT IT IS NOT RANDOM DATA. NOTE: ONLY RETURN THE DATA IN ARRAY FORMAT. DO NOT RETURN ANY KIND OF EXTRA DATA. ONLY THE DATA IN ARRAY FORMAT.`,
-      )
-      console.log(`{"FinancialGrowth": [` + financialGrowth.slice(9, financialGrowth.length - 5)  + "]}"  )
-      setFinancialGrowthData(JSON.parse(`{"FinancialGrowth": [` + financialGrowth.slice(9, financialGrowth.length - 5)  + "]}"  ))
+      // Fetch car industry sales data
+      const carSalesPrompt = `Provide exact industry sales data for the ${localStorage.getItem("Industry")} industry from 2014-2023. Return JSON array with objects containing "year" (number) and "sales" (number in USD billions). Example: [{"year": 2014, "sales": 1500}, ...]. If data unavailable for a year, use null. ONLY RETURN THE ARRAY.`
+      const carResponse = await getGeminiResponse(process.env.NEXT_PUBLIC_GEMINI_API_KEY, carSalesPrompt)
+      const carData = JSON.parse(carResponse.replace(/```json|```/g, '').trim())
+      setFinancialGrowthData(carData)
 
-      const marketCap = await getGeminiResponse(
-        process.env.NEXT_PUBLIC_GEMINI_API_KEY,
-        `Provide the total market capitalization for the pharmaceutical industry as of latest possible date. Return the market cap in USD billions. If an exact date is not possible, provide the most recent available market cap and indicate the date it represents. It's okay if the number if just an approximation. Make an educated guess. NOTE: RETURN ONLY THE NUMBER IN NUMERIC FORMAT AND NO EXTRA TEXT`,
-      )
-      setTotalMarketCap(Number.parseFloat(marketCap))
+      // Fetch pharma market cap
+      const marketCapPrompt = `Provide current total market capitalization for  ${localStorage.getItem("Industry")} industry in USD billions as a single number. Example: 1500.45. If unavailable, estimate. RETURN ONLY THE NUMBER.`
+      const marketCapResponse = await getGeminiResponse(process.env.NEXT_PUBLIC_GEMINI_API_KEY, marketCapPrompt)
+      setTotalMarketCap(parseFloat(marketCapResponse.replace(/[^0-9.]/g, '')))
 
-      const shares = await getGeminiResponse(
-        process.env.NEXT_PUBLIC_GEMINI_API_KEY,
-        `Provide the top 5 companies in the mobile phone industry, along with their respective market share percentages worldwide.  Return the data in a JSON array format. Each element in the array should be an object with the keys "company" (string) and "market_share" (number, representing the percentage).  List the companies in descending order of market share.  If precise market share percentages are unavailable, provide estimates and indicate that they are estimates. If market share data is not readily available, return "Market share data unavailable.". NOTE: ONLY RETURN THE DATA IN JSON ARRAY FORMAT AND THERE IS NO NEED TO INCLUDE THE WORD JSON OR ANYTHING EXTRA. IT SHOULD BE IN A PARSEABLE FORMAT.`,
-      )
-      console.log(`{"Shares": [` + shares.slice(9, shares.length - 5)  + "]}" )
-      setMarketShares(JSON.parse(`{"Shares": [` + shares.slice(9, shares.length - 5)  + "]}" ))
+      // Fetch mobile market shares
+      const marketSharePrompt = `List top 5  ${localStorage.getItem("Industry")} companies with market share percentages as JSON array. Example: [{"company": "Apple", "market_share": 25.3}, ...]. RETURN ONLY THE ARRAY.`
+      const marketShareResponse = await getGeminiResponse(process.env.NEXT_PUBLIC_GEMINI_API_KEY, marketSharePrompt)
+      const marketShareData = JSON.parse(marketShareResponse.replace(/```json|```/g, '').trim())
+      setMarketShares(marketShareData)
 
-      const growth = await getGeminiResponse(
-        process.env.NEXT_PUBLIC_GEMINI_API_KEY,
-        `Calculate the Compound Annual Growth Rate (CAGR) for the mobile phone industry over the most recent 10-year period for which data is available. Ideally, this would be from 2014 to 2024, but if data for 2024 isn't available, use the most recent year's data. Return the CAGR as a decimal (e.g., 0.10 for 10%). If the necessary data (industry revenue or market size for both the start and end years) is not readily available, return "Data unavailable for CAGR calculation. allow approximation or an educated guess"`,
-      )
-      setPotentialGrowth(Number.parseFloat(growth))
+      // Fetch CAGR data
+      const cagrPrompt = `Calculate 10-year CAGR for  ${localStorage.getItem("Industry")} industry as percentage. Example: 5.5. If unavailable, estimate. RETURN ONLY THE NUMBER.`
+      const cagrResponse = await getGeminiResponse(process.env.NEXT_PUBLIC_GEMINI_API_KEY, cagrPrompt)
+      setPotentialGrowth(parseFloat(cagrResponse.replace(/[^0-9.]/g, '')))
 
-      console.log("Data fetched successfully")
     } catch (error) {
-      console.error("Error in getData:", error)
+      console.error("Fetch Error:", error)
+      setError(`Failed to load data: ${error.message}`)
+    } finally {
+      setLoading(false)
     }
   }
 
   useEffect(() => {
     getData()
-  }, []) // Removed getData as a dependency
+    
+  }, [])
 
-  useEffect(() => {
-    console.log("Financial Growth Data:", financialGrowthData["FinancialGrowth"]?.length)
-    console.log("Market Shares:", marketShares)
-    console.log("Total Market Cap:", totalMarketCap)
-    console.log("Potential Growth:", potentialGrowth)
-  },[financialGrowthData, marketShares, totalMarketCap, potentialGrowth])
+  // Chart data configurations
+  const salesChartData = {
+    labels: financialGrowthData.map(item => item.year),
+    datasets: [{
+      label: 'Annual Sales (USD Billion)',
+      data: financialGrowthData.map(item => item.sales),
+      borderColor: '#3b82f6',
+      backgroundColor: '#60a5fa',
+      tension: 0.4,
+      fill: true
+    }]
+  }
+
+  const marketShareChartData = {
+    labels: marketShares.map(item => item.company),
+    datasets: [{
+      label: 'Market Share (%)',
+      data: marketShares.map(item => item.market_share),
+      backgroundColor: [
+        '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe', '#dbeafe'
+      ],
+      borderWidth: 0
+    }]
+  }
+
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Data Visualization</h1>
-      <button onClick={getData} className="bg-blue-500 text-white px-4 py-2 rounded mb-4">
-        Refresh Data
-      </button>
-      {financialGrowthData["FinancialGrowth"]?.length > 0 && (
-          <Component data={financialGrowthData["FinancialGrowth"]} />
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Industry Analytics Dashboard</h1>
+          <button
+            onClick={getData}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+            disabled={loading}
+          >
+            {loading ? (
+              <span className="flex items-center">
+                <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                </svg>
+                Loading...
+              </span>
+            ) : 'Refresh Data'}
+          </button>
+        </div>
+
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-8">
+            {error}
+          </div>
         )}
-        
 
-      {/* {marketShares["Sales"]?.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-2">data</h2> */}
-          <PieChartt/>
-        {/* </div> */}
-      {/* )} */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Car Sales Chart */}
+          <div className="bg-white p-6 rounded-xl shadow-lg">
+            <h2 className="text-xl font-semibold mb-4 text-gray-700"> {localStorage.getItem("Industry")} Industry Sales (2014-2023)</h2>
+            <div className="h-96">
+              <Line 
+                data={salesChartData} 
+                options={chartOptions}
+              />
+            </div>
+          </div>
 
-      {marketShares.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-2">Mobile Phone Industry Market Shares</h2>
-          <Component
-            data={marketShares}
-            xKey="company"
-            yKey="market_share"
-            title="Top 5 Mobile Phone Companies Market Share"
-          />
+          {/* Market Share Chart */}
+          <div className="bg-white p-6 rounded-xl shadow-lg">
+            <h2 className="text-xl font-semibold mb-4 text-gray-700"> {localStorage.getItem("Industry")} Market Share Distribution</h2>
+            <div className="h-96">
+    <Pie
+      data={marketShareChartData}
+      options={{
+        ...chartOptions,
+        plugins: {
+          ...chartOptions.plugins,
+          tooltip: {
+            callbacks: {
+              // Adjust the label callback to show the label and the value.
+              label: (context) =>
+                `${context.label}: ${context.parsed} % market share`
+            }
+          }
+        }
+        // No scales property is needed for a Pie chart.
+      }}
+    />
+  </div>
+
+          </div>
         </div>
-      )}
 
-      {totalMarketCap && (
-        <div className="mb-4">
-          <h2 className="text-xl font-semibold">Pharmaceutical Industry Market Cap</h2>
-          <p className="text-lg">${totalMarketCap.toFixed(2)} billion</p>
-        </div>
-      )}
+        {/* Metrics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+          {totalMarketCap && (
+            <div className="bg-white p-6 rounded-xl shadow-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-medium text-gray-500"> {localStorage.getItem("Industry")} Market Cap</h3>
+                  <p className="mt-2 text-3xl font-bold text-blue-600">
+                    ${totalMarketCap.toLocaleString()}B
+                  </p>
+                </div>
+                <div className="bg-blue-100 p-4 rounded-full">
+                  <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          )}
 
-      {potentialGrowth && (
-        <div className="mb-4">
-          <h2 className="text-xl font-semibold">Mobile Phone Industry CAGR</h2>
-          <p className="text-lg">{(potentialGrowth * 100).toFixed(2)}%</p>
+          {potentialGrowth && (
+            <div className="bg-white p-6 rounded-xl shadow-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-medium text-gray-500"> {localStorage.getItem("Industry")} Industry CAGR (10Y)</h3>
+                  <p className="mt-2 text-3xl font-bold text-green-600">
+                    {potentialGrowth.toFixed(1)}%
+                  </p>
+                </div>
+                <div className="bg-green-100 p-4 rounded-full">
+                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   )
 }
-
