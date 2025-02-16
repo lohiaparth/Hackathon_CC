@@ -5,7 +5,12 @@ import { Button } from "@/components/ui/button";
 
 export default function FundraisingPreparation() {
   const [companyName, setCompanyName] = useState("");
-  const industry = localStorage.getItem("Industry") || "Tech";
+  const [industry, setIndustry] = useState("");
+        useEffect(() => {
+          if (typeof window !== "undefined") {
+            setIndustry(localStorage.getItem("Industry") || "Unknown Industry")
+          }
+        }, [])
   const [currentStage, setCurrentStage] = useState("");
   const [fundingTarget, setFundingTarget] = useState("");
   const [additionalInfo, setAdditionalInfo] = useState("");
