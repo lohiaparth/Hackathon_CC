@@ -14,6 +14,11 @@ export default function ImageGenerator() {
   const [seed, setSeed] = useState(42);
   const [res, setRes] = useState('');
 
+  useEffect(() => {
+    console.log('Description:', description);
+    console.log('Industry:', industry);
+  }, [description, industry]);
+
   const generateImage = async () => {
     setLoading(true);
     const width = 1024;

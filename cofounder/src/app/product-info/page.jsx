@@ -1,15 +1,13 @@
 // filepath: /Users/parthlohia/Desktop/Hackathon_CC/cofounder/src/app/product-info/page.jsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
-import { useLocalStorage, setStorageValue } from "@/utils/storage";
-
 
 export default function IndustryForm() {
   const form = useForm({
@@ -24,12 +22,7 @@ export default function IndustryForm() {
 
   ;
   const [showOtherField, setShowOtherField] = useState(false);
-  const [description, setDescription] = useLocalStorage("Description", "");
   const router = useRouter();
-  
-  useEffect(() => {
-    console.log("Description:", description);
-  }, [description]);
 
   const onSubmit = (data) => {
     
@@ -81,8 +74,7 @@ export default function IndustryForm() {
             // Update react-hook-form state
             field.onChange(e);
             // Store the value in localStorage
-            useLocalStorage("Description", e.target.value);
-            setDescription(e.target.value);
+            localStorage.setItem("Description", e.target.value);
           }}
         />
       </FormControl>
