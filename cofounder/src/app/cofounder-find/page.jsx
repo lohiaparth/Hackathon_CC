@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getGeminiResponse } from "../../api/gemini/route";
 import { Linkedin, Twitter } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function CoFounderPage() {
   const [qualities, setQualities] = useState([]);
@@ -80,6 +81,16 @@ export default function CoFounderPage() {
     fetchCoFounderData();
   }, []);
 
+  const handleLinkedinPost = () => {
+    // Add your LinkedIn posting logic here
+    console.log("Posting to LinkedIn:", linkedinPost);
+  };
+
+  const handleTwitterPost = () => {
+    // Add your Twitter posting logic here
+    console.log("Posting to Twitter:", twitterPost);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-4xl mx-auto">
@@ -112,16 +123,24 @@ export default function CoFounderPage() {
             </div>
 
             {/* LinkedIn Post Block */}
-            <div className="bg-white p-6 rounded-xl shadow-lg flex flex-col">
+            <div className="bg-white p-6 rounded-xl shadow-lg flex flex-col mb-6">
               <div className="flex items-center gap-2 mb-4">
                 <Linkedin className="text-blue-700" size={24} />
                 <h2 className="text-xl font-semibold text-gray-700">LinkedIn Post</h2>
               </div>
-              <p className="text-gray-600 whitespace-pre-line">{linkedinPost}</p>
+              <Textarea 
+                value={linkedinPost}
+                onChange={(e) => setLinkedinPost(e.target.value)}
+                className="min-h-[150px] mb-4"
+                placeholder="Edit your LinkedIn post here..."
+              />
+              <Button 
+                className="self-center"
+                onClick={handleLinkedinPost}
+              >
+                Post to LinkedIn
+              </Button>
             </div>
-            <center>
-                <Button className="my-6">Post to LinkedIn</Button>
-            </center>
 
             {/* Twitter Post Block */}
             <div className="bg-white p-6 rounded-xl shadow-lg flex flex-col">
@@ -129,11 +148,22 @@ export default function CoFounderPage() {
                 <Twitter className="text-blue-500" size={24} />
                 <h2 className="text-xl font-semibold text-gray-700">Twitter Post</h2>
               </div>
-              <p className="text-gray-600 whitespace-pre-line">{twitterPost}</p>
+              <Textarea 
+                value={twitterPost}
+                onChange={(e) => setTwitterPost(e.target.value)}
+                className="min-h-[100px] mb-4"
+                placeholder="Edit your Twitter post here..."
+                maxLength={280}
+              />
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-500">
+                  {twitterPost.length}/280 characters
+                </span>
+                <Button onClick={handleTwitterPost}>
+                  Post to Twitter
+                </Button>
+              </div>
             </div>
-            <center>
-                <Button className="my-6">Post to Twitter</Button>
-            </center>
           </>
         )}
       </div>
