@@ -2,12 +2,28 @@
 import { useEffect, useState } from "react";
 import { getGeminiResponse } from "@/api/gemini/route";
 import { Button } from "@/components/ui/button";
+import { set } from "react-hook-form";
 
 export default function LegalCompliance() {
-  const companyName = localStorage.getItem("CompanyName") || "";
-  const industry = localStorage.getItem("Industry") || "";
-  const currentStage = localStorage.getItem("CurrentStage") || "";
-  const additionalInfo = localStorage.getItem("AdditionalInfo") || "";
+  const [industry, setStoredIndustry] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [currentStage, setCurrentStage] = useState("");
+  const [additionalInfo, setAdditionalInfo] = useState("");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedIndustry = localStorage.getItem("Industry");
+      setStoredIndustry(storedIndustry);
+      const companyName = localStorage.getItem("CompanyName") || "";
+      setCompanyName(companyName);
+      const currentStage = localStorage.getItem("CurrentStage") || "";
+      setCurrentStage(currentStage);
+      const additionalInfo = localStorage.getItem("AdditionalInfo") || "";
+      setAdditionalInfo(additionalInfo);
+    }
+  }, []);
+
+
   const [legalDocs, setLegalDocs] = useState("");
   const [loading, setLoading] = useState(false);
 
