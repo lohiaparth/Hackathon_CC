@@ -5,12 +5,7 @@ import { Button } from "@/components/ui/button";
 
 export default function FundraisingPreparation() {
   const [companyName, setCompanyName] = useState("");
-  const [industry, setIndustry] = useState("");
-        useEffect(() => {
-          if (typeof window !== "undefined") {
-            setIndustry(localStorage.getItem("Industry") || "Unknown Industry")
-          }
-        }, [])
+  const industry = localStorage.getItem("Industry") || "Tech";
   const [currentStage, setCurrentStage] = useState("");
   const [fundingTarget, setFundingTarget] = useState("");
   const [additionalInfo, setAdditionalInfo] = useState("");
@@ -141,7 +136,7 @@ Output the plan as a structured, easy-to-read list.`;
           <pre className="whitespace-pre-wrap text-gray-800">{plan}</pre>
         </div>
         <center>
-        <Button className="mt-6" onClick={() => {window.location.href = "/legalities";}}>
+        <Button onClick={() => {window.location.href = "/legalities";}}>
             Check Legality Compliances
         </Button>
 

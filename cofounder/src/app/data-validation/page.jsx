@@ -32,7 +32,6 @@ export default function Page() {
   const [showArrow, setShowArrow] = useState(false)
   const [conclusion, setConclusion] = useState("")
   const [investmentRisk, setInvestmentRisk] = useState(null);
-  const [industry,setIndustry] = useState("")
 
 
   // Common chart configuration
@@ -86,30 +85,24 @@ export default function Page() {
       }
 
       // Fetch car industry sales data
-      useEffect(() => {
-        if (typeof window !== "undefined") {
-          setIndustry(localStorage.getItem("Industry") || "Unknown Industry")
-        }
-      }, [])
-
-      const carSalesPrompt = `Provide exact industry sales data for the ${industry} industry from 2014-2023. Return JSON array with objects containing "year" (number) and "sales" (number in USD billions). Example: [{"year": 2014, "sales": 1500}, ...]. If data unavailable for a year, use null. ONLY RETURN THE ARRAY.`
+      const carSalesPrompt = `Provide exact industry sales data for the ${localStorage.getItem("Industry")} industry from 2014-2023. Return JSON array with objects containing "year" (number) and "sales" (number in USD billions). Example: [{"year": 2014, "sales": 1500}, ...]. If data unavailable for a year, use null. ONLY RETURN THE ARRAY.`
       const carResponse = await getGeminiResponse(process.env.NEXT_PUBLIC_GEMINI_API_KEY, carSalesPrompt)
       const carData = JSON.parse(carResponse.replace(/```json|```/g, "").trim())
       setFinancialGrowthData(carData)
 
       // Fetch pharma market cap
-      const marketCapPrompt = `Provide current total market capitalization for  ${industry} industry in USD billions as a single number. Example: 1500.45. If unavailable, estimate. RETURN ONLY THE NUMBER.`
+      const marketCapPrompt = `Provide current total market capitalization for  ${localStorage.getItem("Industry")} industry in USD billions as a single number. Example: 1500.45. If unavailable, estimate. RETURN ONLY THE NUMBER.`
       const marketCapResponse = await getGeminiResponse(process.env.NEXT_PUBLIC_GEMINI_API_KEY, marketCapPrompt)
       setTotalMarketCap(Number.parseFloat(marketCapResponse.replace(/[^0-9.]/g, "")))
 
       // Fetch mobile market shares
-      const marketSharePrompt = `List top 5  ${industry} companies with market share percentages as JSON array. Example: [{"company": "Apple", "market_share": 25.3}, ...]. RETURN ONLY THE ARRAY.`
+      const marketSharePrompt = `List top 5  ${localStorage.getItem("Industry")} companies with market share percentages as JSON array. Example: [{"company": "Apple", "market_share": 25.3}, ...]. RETURN ONLY THE ARRAY.`
       const marketShareResponse = await getGeminiResponse(process.env.NEXT_PUBLIC_GEMINI_API_KEY, marketSharePrompt)
       const marketShareData = JSON.parse(marketShareResponse.replace(/```json|```/g, "").trim())
       setMarketShares(marketShareData)
 
       // Fetch CAGR data
-      const cagrPrompt = `Calculate 10-year CAGR for  ${industry} industry as percentage. Example: 5.5. If unavailable, estimate. RETURN ONLY THE NUMBER.`
+      const cagrPrompt = `Calculate 10-year CAGR for  ${localStorage.getItem("Industry")} industry as percentage. Example: 5.5. If unavailable, estimate. RETURN ONLY THE NUMBER.`
       const cagrResponse = await getGeminiResponse(process.env.NEXT_PUBLIC_GEMINI_API_KEY, cagrPrompt)
       setPotentialGrowth(Number.parseFloat(cagrResponse.replace(/[^0-9.]/g, "")))
     } catch (error) {
@@ -132,7 +125,7 @@ export default function Page() {
 
   const generateConclusion = async () => {
     try {
-      const prompt = `Based on the following data for the $${industry} industry:
+      const prompt = `Based on the following data for the ${localStorage.getItem("Industry")} industry:
       - Total Market Cap: $${totalMarketCap}B
       - 10-year CAGR: ${potentialGrowth.toFixed(1)}%
       - Top company market share: ${marketShares[0]?.company} with ${marketShares[0]?.market_share}%
@@ -140,7 +133,7 @@ export default function Page() {
 
       const response = await getGeminiResponse(process.env.NEXT_PUBLIC_GEMINI_API_KEY, prompt)
       setConclusion(response)
-      const riskPrompt = `Assess the investment risk level for the ${industry} industry on a scale from 1 (very safe) to 10 (very risky). Example Output: 7 (Risky).`
+      const riskPrompt = `Assess the investment risk level for the ${localStorage.getItem("Industry")} industry on a scale from 1 (very safe) to 10 (very risky). Example Output: 7 (Risky).`
 const riskResponse = await getGeminiResponse(process.env.NEXT_PUBLIC_GEMINI_API_KEY, riskPrompt);
 setInvestmentRisk(Number.parseInt(riskResponse.replace(/[^0-9]/g, ""), 10));
 
