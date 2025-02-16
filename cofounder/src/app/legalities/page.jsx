@@ -1,94 +1,135 @@
 "use client";
+import { useEffect, useState } from "react";
+import { getGeminiResponse } from "@/api/gemini/route";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useRouter } from 'next/navigation';
+export default function LegalCompliance() {
+  const companyName = localStorage.getItem("CompanyName") || "";
+  const industry = localStorage.getItem("Industry") || "";
+  const currentStage = localStorage.getItem("CurrentStage") || "";
+  const additionalInfo = localStorage.getItem("AdditionalInfo") || "";
+  const [legalDocs, setLegalDocs] = useState("");
+  const [loading, setLoading] = useState(false);
 
-export default function TrademarkPatentForm() {
-  const form = useForm({
-    defaultValues: {
-      brandName: "",
-      productDescription: "",
-    },
-  });
+  const handleSubmit = async () => {
+    setLoading(true);
 
-  const router = useRouter();
+    const legalPrompt = `You are an expert legal advisor for startups. Based on the following company details, generate a comprehensive checklist of all the legal documents, licenses, permits, and regulatory compliance items required for the company. Include items such as incorporation documents, operating licenses, tax registrations, employment contracts, intellectual property registrations, and any industry-specific legal requirements.
 
-  const onSubmit = (data) => {
-    console.debug("Form Data:", data);
+Company Name: ${companyName}
+Industry: ${industry}
+Current Stage: ${currentStage}
+Additional Info: ${additionalInfo}
 
-    // Store data in localStorage
-    localStorage.setItem("Brand Name", data.brandName);
-    localStorage.setItem("Product Description", data.productDescription);
+Output the checklist as a structured, easy-to-read list with bullet points.
+Also don't start with okay,... directly start with what is expected as output`
 
-    // Redirect to results page (modify as needed)
-    router.push('/check-trademark-patent');
+    try {
+      const response = await getGeminiResponse(
+        process.env.NEXT_PUBLIC_GEMINI_API_KEY,
+        legalPrompt
+      );
+      let cleanResponse = response.replace(/```(json|text)?|```/g, "").trim();
+      cleanResponse = cleanResponse.replace(/^(\s*)\*(\s)/gm, "$1- ");
+
+  // 2. Convert any text wrapped between double asterisks into <strong> tags.
+  cleanResponse = cleanResponse.replace(/\*\*(.+?)\*\*/g, "$1");
+      setLegalDocs(cleanResponse);
+    } catch (error) {
+      console.error("Error generating legal documentation:", error);
+      setLegalDocs("Failed to generate legal documentation. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
+  useEffect(() => {
+    handleSubmit();
+   }, []);
 
   return (
-    <div className="max-w-md mx-auto p-6 border rounded-lg shadow-sm bg-white">
-      <h2 className="text-2xl font-bold">Check Trademark & Patent Status</h2>
-      <p className="text-gray-500">Enter your brand name and product details to check for trademarks and patent eligibility.</p>
+    <div className="min-h-screen bg-gray-100 p-8">
+      <h1 className="text-4xl font-bold text-center mb-8">
+        Legal Compliance & Documentation
+      </h1>
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-4">
-          
-          {/* Brand Name */}
-          <FormField
-            control={form.control}
-            name="brandName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Brand / Company Name</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Enter your brand name"
-                    {...field}
-                    onChange={(e) => {
-                      field.onChange(e);
-                      localStorage.setItem("Brand Name", e.target.value);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Product Description */}
-          <FormField
-            control={form.control}
-            name="productDescription"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Product / Service Description</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Describe your product or service"
-                    {...field}
-                    onChange={(e) => {
-                      field.onChange(e);
-                      localStorage.setItem("Product Description", e.target.value);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Buttons */}
-          <div className="flex justify-between">
-            <Button variant="outline">Previous</Button>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-              Check Status →
-            </Button>
+      {/* {!legalDocs && (
+        <form
+          onSubmit={handleSubmit}
+          className="max-w-xl mx-auto bg-white p-6 rounded shadow"
+        >
+          <div className="mb-4">
+            <label className="block text-gray-700 font-semibold mb-2">
+              Company Name
+            </label>
+            <input
+              type="text"
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
+              required
+              placeholder="e.g., Tech Innovators Inc."
+              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           </div>
+
+          <div className="mb-4">
+            <label className="block text-gray-700 font-semibold mb-2">
+              Industry
+            </label>
+            <input
+              type="text"
+              value={industry}
+              onChange={(e) => setIndustry(e.target.value)}
+              required
+              placeholder="e.g., FinTech, Healthcare, etc."
+              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-gray-700 font-semibold mb-2">
+              Current Stage
+            </label>
+            <input
+              type="text"
+              value={currentStage}
+              onChange={(e) => setCurrentStage(e.target.value)}
+              required
+              placeholder="e.g., Seed, Series A, etc."
+              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-gray-700 font-semibold mb-2">
+              Additional Info
+            </label>
+            <textarea
+              value={additionalInfo}
+              onChange={(e) => setAdditionalInfo(e.target.value)}
+              placeholder="Any additional legal considerations..."
+              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-green-500 text-white p-3 rounded hover:bg-green-600 transition-colors"
+          >
+            {loading ? "Generating Legal Documentation..." : "Generate Legal Compliance Checklist"}
+          </button>
         </form>
-      </Form>
+      )} */}
+      {!legalDocs && (
+        <div className="max-w-3xl mx-auto mt-8 bg-white p-6 rounded shadow">
+          <p className="text-gray-800">Generating legal documentation customized specifically for your own startup...</p>
+        </div>
+      )}
+
+      {legalDocs && (
+        <div className="max-w-3xl mx-auto mt-8 bg-white p-6 rounded shadow">
+          <h2 className="text-2xl font-bold mb-4">Legal Compliance Checklist</h2>
+          <pre className="whitespace-pre-wrap text-gray-800">{legalDocs}</pre>
+        </div>
+      )}
     </div>
   );
 }

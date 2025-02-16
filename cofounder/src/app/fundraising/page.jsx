@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { getGeminiResponse } from "@/api/gemini/route";
+import { Button } from "@/components/ui/button";
 
 export default function FundraisingPreparation() {
   const [companyName, setCompanyName] = useState("");
@@ -71,13 +72,13 @@ Output the plan as a structured, easy-to-read list.`;
             <input
               type="text"
               value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
+              onChange={(e) => {setCompanyName(e.target.value);localStorage.setItem("CompanyName", e.target.value);}}
               required
               placeholder="e.g., Tech Innovators Inc."
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          
+
           <div className="mb-4">
             <label className="block text-gray-700 font-semibold mb-2">
               Current Stage
@@ -85,7 +86,7 @@ Output the plan as a structured, easy-to-read list.`;
             <input
               type="text"
               value={currentStage}
-              onChange={(e) => setCurrentStage(e.target.value)}
+              onChange={(e) => {setCurrentStage(e.target.value);localStorage.setItem("CurrentStage", e.target.value);}}
               required
               placeholder="e.g., Seed, Series A, etc."
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -99,9 +100,9 @@ Output the plan as a structured, easy-to-read list.`;
             <input
               type="text"
               value={fundingTarget}
-              onChange={(e) => setFundingTarget(e.target.value)}
+              onChange={(e) => {setFundingTarget(e.target.value);localStorage.setItem("FundingTarget", e.target.value);}}
               required
-              placeholder="e.g., $2M, $5M, etc."
+              placeholder="e.g., Rs. 1 Cr., Rs. 2 Cr., etc."
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -112,7 +113,7 @@ Output the plan as a structured, easy-to-read list.`;
             </label>
             <textarea
               value={additionalInfo}
-              onChange={(e) => setAdditionalInfo(e.target.value)}
+              onChange={(e) => {setAdditionalInfo(e.target.value);localStorage.setItem("AdditionalInfo", e.target.value);}}
               placeholder="Any additional information about your startup..."
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -129,10 +130,19 @@ Output the plan as a structured, easy-to-read list.`;
 
       {/* Display the generated plan if available */}
       {plan && (
-        <div className="max-w-3xl mx-auto mt-8 bg-white p-6 rounded shadow">
+        <>
+                <div className="max-w-3xl mx-auto mt-8 bg-white p-6 rounded shadow">
           <h2 className="text-2xl font-bold mb-4">Your Fundraising Plan</h2>
           <pre className="whitespace-pre-wrap text-gray-800">{plan}</pre>
         </div>
+        <center>
+        <Button onClick={() => {window.location.href = "/legalities";}}>
+            Check Legality Compliances
+        </Button>
+
+        </center>
+        </>
+
       )}
     </div>
   );

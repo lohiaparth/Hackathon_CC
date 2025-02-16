@@ -35,6 +35,7 @@ export default function ImageGenerator() {
     const img = new window.Image();
     img.src = url;
     img.onload = () => setLoading(false);
+    generateIdeas();
   };
 
   const generateIdeas = async () => {
@@ -62,7 +63,6 @@ export default function ImageGenerator() {
 
   useEffect(() => {
     generateImage();
-    generateIdeas();
   }, []);
 
   return (

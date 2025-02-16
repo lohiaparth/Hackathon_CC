@@ -46,9 +46,9 @@ export default function MoodPopup() {
 
   // Automatically show the popup every 60 seconds
   useEffect(() => {
-    const interval = setInterval(() => {
+    const interval = setTimeout(() => {
       setIsVisible(true);
-    }, 60000); // 60,000 ms = 60 seconds
+    }, 20000); // 60,000 ms = 60 seconds
 
     return () => clearInterval(interval);
   }, []);
