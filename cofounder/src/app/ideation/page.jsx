@@ -9,6 +9,7 @@ export default function ImageGenerator() {
   // Fallback values in case localStorage is empty
   const industry = getStorageValue('Industry', 'technology');
   const description = getStorageValue('Description', 'Healthcare product');
+  console.log(description)
   const [imageUrl, setImageUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [seed, setSeed] = useState(42);
