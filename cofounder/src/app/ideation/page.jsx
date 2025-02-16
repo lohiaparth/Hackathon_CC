@@ -15,9 +15,9 @@ export default function ImageGenerator() {
   const [res, setRes] = useState('');
 
   useEffect(() => {
-    console.log('Description:', description);
-    console.log('Industry:', industry);
-  }, [description, industry]);
+    console.debug('Description:', description);
+    console.debug('Industry:', industry);
+  }, []);
 
   const generateImage = async () => {
     setLoading(true);
