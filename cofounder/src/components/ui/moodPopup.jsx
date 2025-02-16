@@ -1,42 +1,21 @@
 "use client";
 import { useState, useEffect } from "react";
+import { getGeminiResponse } from "@/api/gemini/route";
 
 export default function MoodPopup() {
   const [isVisible, setIsVisible] = useState(false);
   const [mood, setMood] = useState("");
   const [response, setResponse] = useState("");
 
-  const handleSubmit = () => {
+  
+
+  const handleSubmit = async () => {
     if (!mood.trim()) return;
 
-    const lowerMood = mood.toLowerCase();
-    let reply = "";
-
-    if (
-      lowerMood.includes("happy") ||
-      lowerMood.includes("good") ||
-      lowerMood.includes("great")
-    ) {
-      reply = "That's wonderful to hear! I'm really glad you're feeling good.";
-    } else if (
-      lowerMood.includes("sad") ||
-      lowerMood.includes("down") ||
-      lowerMood.includes("unhappy")
-    ) {
-      reply =
-        "I'm sorry you're feeling down. Remember, it's okay to have tough days—I’m here for you.";
-    } else if (
-      lowerMood.includes("anxious") ||
-      lowerMood.includes("stressed") ||
-      lowerMood.includes("nervous")
-    ) {
-      reply =
-        "It sounds like you’re feeling anxious. Sometimes taking a few deep breaths can help. I'm here if you need to talk.";
-    } else {
-      reply =
-        "Thank you for sharing how you feel. I'm here to listen if you'd like to share more.";
-    }
-
+    const reply = await getGeminiResponse(
+        process.env.NEXT_PUBLIC_GEMINI_API_KEY,
+        mood + "NOTE: RESPONSE SHUOLD BE OF MAXIMUM 100 WORDS"
+      );
     setResponse(reply);
   };
 
@@ -48,7 +27,7 @@ export default function MoodPopup() {
   useEffect(() => {
     const interval = setTimeout(() => {
       setIsVisible(true);
-    }, 20000); // 60,000 ms = 60 seconds
+    }, 2000); // 60,000 ms = 60 seconds
 
     return () => clearInterval(interval);
   }, []);

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { getGeminiResponse } from "@/api/gemini/route";
+import { Button } from "@/components/ui/button";
 
 export default function LegalCompliance() {
   const companyName = localStorage.getItem("CompanyName") || "";
@@ -125,10 +126,17 @@ Also don't start with okay,... directly start with what is expected as output`
       )}
 
       {legalDocs && (
+        <>
         <div className="max-w-3xl mx-auto mt-8 bg-white p-6 rounded shadow">
           <h2 className="text-2xl font-bold mb-4">Legal Compliance Checklist</h2>
           <pre className="whitespace-pre-wrap text-gray-800">{legalDocs}</pre>
         </div>
+        <center>
+                <Button className="mt-6" onClick={() => {window.location.href = "/legalities";}}>
+                    Print Checklist
+                </Button>
+                </center>
+        </>
       )}
     </div>
   );

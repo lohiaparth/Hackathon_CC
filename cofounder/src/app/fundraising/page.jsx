@@ -136,7 +136,7 @@ Output the plan as a structured, easy-to-read list.`;
           <pre className="whitespace-pre-wrap text-gray-800">{plan}</pre>
         </div>
         <center>
-        <Button onClick={() => {window.location.href = "/legalities";}}>
+        <Button className="mt-6" onClick={() => {window.location.href = "/legalities";}}>
             Check Legality Compliances
         </Button>
 

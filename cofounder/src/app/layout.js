@@ -19,6 +19,9 @@ export default function RootLayout({ children }) {
 
             <div className="space-x-6">
             <Link href="/data-validation" className="hover:underline">
+                Find a Cofounder
+              </Link>
+            <Link href="/data-validation" className="hover:underline">
                 Validate Your Idea
               </Link>
               <Link href="/ideation" className="hover:underline">

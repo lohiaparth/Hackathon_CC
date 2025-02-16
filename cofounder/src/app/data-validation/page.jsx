@@ -31,6 +31,8 @@ export default function Page() {
   const [error, setError] = useState(null)
   const [showArrow, setShowArrow] = useState(false)
   const [conclusion, setConclusion] = useState("")
+  const [investmentRisk, setInvestmentRisk] = useState(null);
+
 
   // Common chart configuration
   const chartOptions = {
@@ -131,6 +133,10 @@ export default function Page() {
 
       const response = await getGeminiResponse(process.env.NEXT_PUBLIC_GEMINI_API_KEY, prompt)
       setConclusion(response)
+      const riskPrompt = `Assess the investment risk level for the ${localStorage.getItem("Industry")} industry on a scale from 1 (very safe) to 10 (very risky). Example Output: 7 (Risky).`
+const riskResponse = await getGeminiResponse(process.env.NEXT_PUBLIC_GEMINI_API_KEY, riskPrompt);
+setInvestmentRisk(Number.parseInt(riskResponse.replace(/[^0-9]/g, ""), 10));
+
     } catch (error) {
       console.error("Error generating conclusion:", error)
       setConclusion("Unable to generate conclusion. Please try again.")
@@ -298,7 +304,15 @@ export default function Page() {
                 <h2 className="text-xl font-semibold mb-2 text-gray-700">Conclusion</h2>
                 <p className="text-gray-600">{conclusion}</p>
               </div>
+              
             )}
+            {investmentRisk && (
+                                          <div className="mt-4 p-6 bg-white rounded-xl shadow-lg max-w-2xl">
+                                          <h2 className="text-xl font-semibold mb-2 text-gray-700">Risk Assessment - 1 (very safe) to 10 (very risky)</h2>
+                                          <p className="text-gray-600">{investmentRisk}</p>
+                                        </div>
+            )}
+
           </div>
         )}
       </div>
