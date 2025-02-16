@@ -23,7 +23,7 @@ export default function ImageGenerator() {
     const newSeed = Math.floor(Math.random() * 10000);
     setSeed(newSeed);
 
-    const url = `https://pollinations.ai/p/${encodeURIComponent("unique idea for " + industry + " company")}?width=${width}&height=${height}&seed=${newSeed}&model=${model}`;
+    const url = `https://pollinations.ai/p/${encodeURIComponent("unique idea for " + industry + " company for product(s) with description: "+description)}?width=${width}&height=${height}&seed=${newSeed}&model=${model}`;
     setImageUrl(url);
     
     // Preload the image so we can update the loading state correctly
