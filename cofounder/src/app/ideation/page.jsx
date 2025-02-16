@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { getGeminiResponse } from '@/api/gemini/route';
 import { set } from 'react-hook-form';
+import { getStorageValue } from '@/utils/storage';
 
 export default function ImageGenerator() {
   // Fallback values in case localStorage is empty
@@ -14,8 +15,8 @@ export default function ImageGenerator() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setIndustry(localStorage.getItem("Industry") || "tech");
-      setDescription(localStorage.getItem("Description") || "Your startup idea description goes here.");
+      setIndustry(getStorageValue("Industry") || "tech");
+      setDescription(getStorageValue("Description") || "Your startup idea description goes here.");
     }
   }, []);
 
