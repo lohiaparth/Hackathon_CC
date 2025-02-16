@@ -77,7 +77,7 @@ export default function BestSellingPage() {
           <div key={index} className="bg-white rounded-lg shadow p-4">
             <div className="relative h-48 w-full mb-4">
               <Image
-                src={`https://loremflickr.com/600/400/cat}`}
+                src={`https://loremflickr.com/600/400/dog}`}
                 alt={item.name}
                 fill
                 className="object-cover rounded"
