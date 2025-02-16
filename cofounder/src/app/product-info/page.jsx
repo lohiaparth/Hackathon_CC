@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
+import { useLocalStorage } from "@/utils/storage";
 
 export default function IndustryForm() {
   const form = useForm({
@@ -74,7 +75,7 @@ export default function IndustryForm() {
             // Update react-hook-form state
             field.onChange(e);
             // Store the value in localStorage
-            localStorage.setItem("Description", e.target.value);
+            useLocalStorage("Description", e.target.value);
           }}
         />
       </FormControl>
