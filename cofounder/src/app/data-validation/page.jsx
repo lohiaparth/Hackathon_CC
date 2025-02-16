@@ -17,6 +17,7 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarEleme
 import { Line, Pie } from "react-chartjs-2"
 import { getGeminiResponse } from "../../api/gemini/route"
 import { ArrowDownCircle } from "lucide-react"
+import MoodPopup from "@/components/ui/moodPopup"
 
 // Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend)
@@ -301,6 +302,7 @@ export default function Page() {
           </div>
         )}
       </div>
+      <MoodPopup />
     </div>
   )
 }
