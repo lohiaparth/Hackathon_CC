@@ -2,13 +2,15 @@
 import { useState } from "react";
 import { getGeminiResponse } from "@/api/gemini/route";
 import { Button } from "@/components/ui/button";
+import { useLocalStorage } from "@/utils/storage";
 
 export default function FundraisingPreparation() {
-  const [companyName, setCompanyName] = useState("");
-  const industry = localStorage.getItem("Industry") || "Tech";
-  const [currentStage, setCurrentStage] = useState("");
-  const [fundingTarget, setFundingTarget] = useState("");
-  const [additionalInfo, setAdditionalInfo] = useState("");
+    const [companyName, setCompanyName] = useLocalStorage("CompanyName", "");
+    const [industry, setIndustry] = useLocalStorage("Industry", "Tech");
+    const [currentStage, setCurrentStage] = useLocalStorage("CurrentStage", "");
+    const [fundingTarget, setFundingTarget] = useLocalStorage("FundingTarget", "");
+    const [additionalInfo, setAdditionalInfo] = useLocalStorage("AdditionalInfo", "");
+    
   const [plan, setPlan] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -72,7 +74,7 @@ Output the plan as a structured, easy-to-read list.`;
             <input
               type="text"
               value={companyName}
-              onChange={(e) => {setCompanyName(e.target.value);localStorage.setItem("CompanyName", e.target.value);}}
+              onChange={(e) => {setCompanyName(e.target.value);useLocalStorage("CompanyName", e.target.value);}}
               required
               placeholder="e.g., Tech Innovators Inc."
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -86,7 +88,7 @@ Output the plan as a structured, easy-to-read list.`;
             <input
               type="text"
               value={currentStage}
-              onChange={(e) => {setCurrentStage(e.target.value);localStorage.setItem("CurrentStage", e.target.value);}}
+              onChange={(e) => {setCurrentStage(e.target.value);useLocalStorage("CurrentStage", e.target.value);}}
               required
               placeholder="e.g., Seed, Series A, etc."
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -100,7 +102,7 @@ Output the plan as a structured, easy-to-read list.`;
             <input
               type="text"
               value={fundingTarget}
-              onChange={(e) => {setFundingTarget(e.target.value);localStorage.setItem("FundingTarget", e.target.value);}}
+              onChange={(e) => {setFundingTarget(e.target.value);useLocalStorage("FundingTarget", e.target.value);}}
               required
               placeholder="e.g., Rs. 1 Cr., Rs. 2 Cr., etc."
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -113,7 +115,7 @@ Output the plan as a structured, easy-to-read list.`;
             </label>
             <textarea
               value={additionalInfo}
-              onChange={(e) => {setAdditionalInfo(e.target.value);localStorage.setItem("AdditionalInfo", e.target.value);}}
+              onChange={(e) => {setAdditionalInfo(e.target.value);useLocalStorage("AdditionalInfo", e.target.value);}}
               placeholder="Any additional information about your startup..."
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
