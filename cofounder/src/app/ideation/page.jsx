@@ -7,18 +7,11 @@ import { getStorageValue } from '@/utils/storage';
 
 export default function ImageGenerator() {
   // Fallback values in case localStorage is empty
-  const [industry, setIndustry] = useState("tech");
-  const [description, setDescription] = useState("Your startup idea description goes here.");  const [imageUrl, setImageUrl] = useState('');
+  const industry = getStorageValue('Industry', 'technology');
+  const description = getStorageValue('ProductDescription', 'AI-powered file organization desktop application');
   const [loading, setLoading] = useState(false);
   const [seed, setSeed] = useState(42);
   const [res, setRes] = useState('');
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setIndustry(getStorageValue("Industry") || "tech");
-      setDescription(getStorageValue("Description") || "Your startup idea description goes here.");
-    }
-  }, []);
 
   const generateImage = async () => {
     setLoading(true);
