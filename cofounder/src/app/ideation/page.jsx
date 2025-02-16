@@ -6,12 +6,18 @@ import { set } from 'react-hook-form';
 
 export default function ImageGenerator() {
   // Fallback values in case localStorage is empty
-  const industry = localStorage.getItem("Industry") || "tech";
-  const description = localStorage.getItem("Description") || "Your startup idea description goes here.";
-  const [imageUrl, setImageUrl] = useState('');
+  const [industry, setIndustry] = useState("tech");
+  const [description, setDescription] = useState("Your startup idea description goes here.");  const [imageUrl, setImageUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [seed, setSeed] = useState(42);
   const [res, setRes] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIndustry(localStorage.getItem("Industry") || "tech");
+      setDescription(localStorage.getItem("Description") || "Your startup idea description goes here.");
+    }
+  }, []);
 
   const generateImage = async () => {
     setLoading(true);
