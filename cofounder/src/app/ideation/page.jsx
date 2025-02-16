@@ -8,7 +8,8 @@ import { getStorageValue } from '@/utils/storage';
 export default function ImageGenerator() {
   // Fallback values in case localStorage is empty
   const industry = getStorageValue('Industry', 'technology');
-  const description = getStorageValue('ProductDescription', 'AI-powered file organization desktop application');
+  const description = getStorageValue('Description', 'Healthcare product');
+  const [imageUrl, setImageUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [seed, setSeed] = useState(42);
   const [res, setRes] = useState('');
