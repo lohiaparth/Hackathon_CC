@@ -20,11 +20,13 @@ export default function BestSellingPage() {
         try {
           const prompt = `Based on the industry ${storedIndustry} and description ${storedDescription}, generate an array of 6 best-selling products/services related to the product.
           Example Output:
-          const bestSellingItems = [
+        {
+          "items": [
       {
         name: "Innovative Healthcare Gadget",
         description: "Top-rated gadget that revolutionizes the Healthcare market.",
         query: "Healthcare gadget",
+        price: "Rs. 10000"
       },
       {
         name: "Premium ${storedIndustry} Service Package",
@@ -46,21 +48,23 @@ export default function BestSellingPage() {
         description: "Sustainable and innovative product for the modern ${storedIndustry} market.",
         query: "${storedIndustry} eco",
       },
-    ];
+        ]};
           `;
     
-          const response = await getGeminiResponse(process.env.NEXT_PUBLIC_GEMINI_API_KEY, prompt)
-          setConclusion(response)
+          const response = await getGeminiResponse(process.env.NEXT_PUBLIC_GEMINI_API_KEY, prompt);
+        // Remove any markdown formatting and parse the JSON
+        const parsedResponse = JSON.parse(response.replace(/```json|```/g, "").trim());
+        setConclusion(parsedResponse);
+        // Set the items state to the array from the parsed response
+        setItems(parsedResponse.items);
+
         } catch (error) {
           console.error("Error generating conclusion:", error)
           setConclusion("Unable to generate conclusion. Please try again.")
         }
       }
 
-    generateProducts();
-      console.log(conclusion)
-
-    // setItems(bestSellingItems);
+        generateProducts();
   }, []);
 
   return (
@@ -73,7 +77,7 @@ export default function BestSellingPage() {
           <div key={index} className="bg-white rounded-lg shadow p-4">
             <div className="relative h-48 w-full mb-4">
               <Image
-                src={`https://loremflickr.com/600/400/${item.query.replace(/ /g, ",")}`}
+                src={`https://loremflickr.com/600/400/cat}`}
                 alt={item.name}
                 fill
                 className="object-cover rounded"
