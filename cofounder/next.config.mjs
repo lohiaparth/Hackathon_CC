@@ -2,6 +2,15 @@
 const nextConfig = {
     images: {
       domains: ['pollinations.ai'],
+      remotePatterns: [
+        {
+          protocol: 'https',
+          hostname: 'loremflickr.com',
+          port: '',
+          pathname: '/**',
+        },
+      ],
+    
     },
   };
   

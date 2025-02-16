@@ -1,15 +1,19 @@
 "use client"
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { getGeminiResponse } from '@/api/gemini/route';
+import { set } from 'react-hook-form';
 
 export default function ImageGenerator() {
-  const [prompt, setPrompt] = useState('');
+  // Fallback values in case localStorage is empty
+  const industry = localStorage.getItem("Industry") || "tech";
+  const description = localStorage.getItem("Description") || "Your startup idea description goes here.";
   const [imageUrl, setImageUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [seed, setSeed] = useState(42);
+  const [res, setRes] = useState('');
 
   const generateImage = async () => {
-    if (!prompt) return;
     setLoading(true);
     const width = 1024;
     const height = 1024;
@@ -18,13 +22,25 @@ export default function ImageGenerator() {
     const newSeed = Math.floor(Math.random() * 10000);
     setSeed(newSeed);
 
-    const url = `https://pollinations.ai/p/${encodeURIComponent("unique idea for "+prompt+" company")}?width=${width}&height=${height}&seed=${newSeed}&model=${model}`;
+    const url = `https://pollinations.ai/p/${encodeURIComponent("unique idea for " + industry + " company")}?width=${width}&height=${height}&seed=${newSeed}&model=${model}`;
     setImageUrl(url);
     
+    // Preload the image so we can update the loading state correctly
     const img = new window.Image();
     img.src = url;
     img.onload = () => setLoading(false);
   };
+
+  const generateIdeas = async () => {
+    const prompt = `Give a unique idea for a ${industry} company. Give the answer in the format of 10 short pointers. They should give a crisp understanding of the idea. NOTE: INCLUDE ONLY THE 5 POINTERS AND NOTHING ELSE. NO BOLD FONT SHOULD BE USED`;
+    try {
+      const response = await getGeminiResponse(process.env.NEXT_PUBLIC_GEMINI_API_KEY, prompt);
+      setRes(response);
+      console.log(response);
+    } catch (error) {
+      console.error('Error in generateIdeas:', error);
+    }
+  }
 
   const downloadImage = async () => {
     if (!imageUrl) return;
@@ -38,42 +54,67 @@ export default function ImageGenerator() {
     document.body.removeChild(link);
   };
 
+  useEffect(() => {
+    generateImage();
+    generateIdeas();
+  }, []);
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100">
-      <h1 className="text-2xl font-bold mb-4">Unique Ideas for Your Startup</h1>
-      <input
-        type="text"
-        className="p-2 border border-gray-300 rounded-md w-80 mb-4"
-        placeholder="Enter a prompt"
-        value={prompt}
-        onChange={(e) => setPrompt(e.target.value)}
-      />
-      <button
-        onClick={generateImage}
-        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-      >
-        {loading ? 'Generating...' : 'Generate Image'}
-      </button>
-      {loading && <p className="mt-4 text-lg font-semibold">Loading...</p>}
-      {imageUrl && !loading && (
-        <div className="mt-6 flex flex-col items-center">
-          <Image src={imageUrl} alt="Generated" width={512} height={512} className="rounded-md" />
-          <div className="mt-4 flex gap-4">
-            <button
-              onClick={generateImage}
-              className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
-            >
-              Generate New Idea
-            </button>
-            <button
-              onClick={downloadImage}
-              className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
-            >
-              Download Image
-            </button>
-          </div>
+    <div className="min-h-screen bg-gray-100">
+      {/* Heading at the top */}
+      <header className="py-4 text-center">
+        <h1 className="text-4xl font-bold">Unique Ideas for Your Startup</h1>
+      </header>
+
+      {/* Main content area split into two columns */}
+      <div className="flex flex-col md:flex-row p-8">
+        {/* Left Column: Image and Buttons */}
+        <div className="md:w-1/2 flex flex-col items-center">
+          {loading ? (
+            <p className="text-lg font-semibold">Loading...</p>
+          ) : (
+            imageUrl && (
+              <Image
+                src={imageUrl}
+                alt="Generated"
+                width={512}
+                height={512}
+                className="rounded-md"
+              />
+            )
+          )}
+          {/* Render buttons only when an image is generated and loading is complete */}
+          {!loading && imageUrl && (
+            <div className="mt-4 flex gap-4">
+              <button
+                onClick={generateImage}
+                className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
+              >
+                Generate New Idea
+              </button>
+              <button
+                onClick={downloadImage}
+                className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+              >
+                Download Image
+              </button>
+            </div>
+          )}
         </div>
-      )}
+
+        {/* Right Column: Additional Text */}
+        <div className="md:w-1/2 flex flex-col justify-center items-center md:items-start mt-8 md:mt-0 md:pl-8">
+        <p className="text-lg text-gray-700">
+  {res.split('\n').map((line, index) => (
+    <span key={index}>
+      {line}
+      <br />
+    </span>
+  ))}
+</p>
+
+        </div>
+      </div>
     </div>
   );
 }
